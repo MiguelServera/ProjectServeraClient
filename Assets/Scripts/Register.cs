@@ -14,33 +14,58 @@ public class Register : MonoBehaviour
     public InputField emailInputField;
     public InputField passwordInputField;
     public InputField confirmPasswordInputField;
+    public InputField countryInputField;
     public Button registerButton;
-    public Text messageBoardText;
     public Player player;
+    public Image avatarImage;
+    public Text debugText;
 
     //Search for the gameObject "Player"
     void Start()
     {
         player = FindObjectOfType<Player>();
+        StartCoroutine(LoadImage());
     }
     public void OnRegisterButtonClick()
     {
         StartCoroutine(RegisterNewUser());
     }
 
+    public IEnumerator LoadImage()
+    {
+        using (UnityWebRequest httpClient = new UnityWebRequest("https://clickystorage.blob.core.windows.net/clickycrates-blobs/DevilPika.png"))
+        {
+            httpClient.downloadHandler = new DownloadHandlerTexture();
+            yield return httpClient.SendWebRequest();
+            if (httpClient.isNetworkError || httpClient.isHttpError)
+            {
+                Debug.Log(httpClient.error);
+            }
+            else
+            {
+                Texture2D texture = DownloadHandlerTexture.GetContent(httpClient);
+                avatarImage.sprite = Sprite.Create(texture,
+                                                    new Rect(0.0f, 0.0f, texture.width, texture.height),
+                                                    new Vector2(0.5f, 0.5f),
+                                                    100.0f);
+            }
+        }
+    }
     private IEnumerator RegisterNewUser()
     {
         yield return RegisterUser();
         yield return Helper.InitializeToken(emailInputField.text, passwordInputField.text);  //Sets player.Token
-        messageBoardText.text += "\nToken: " + player.Token.Substring(0, 7) + "...";
+        Debug.Log("\nToken: " + player.Token.Substring(0, 7) + "...");
         yield return Helper.GetPlayerId();  //Sets player.Id
-        messageBoardText.text += "\nId: " + player.Id;
+        Debug.Log("\nId: " + player.Id);
         player.Email = emailInputField.text;
         player.Name = nameInputField.text;
         player.Nickname = nicknameInputField.text;
+        player.Country = countryInputField.text;
         player.BirthDay = DateTime.Parse(birthdateInputField.text);
+        player.BlobUri = "https://clickystorage.blob.core.windows.net/clickycrates-blobs/DevilPika.png";
         yield return InsertPlayer();
-        messageBoardText.text += $"\nPlayer \"{player.Name}\" registered.";
+        debugText.text = ($"\nPlayer \"{player.Name}\" registered.");
         player.Id = string.Empty;
         player.Token = string.Empty;
         player.Name = string.Empty;
@@ -71,7 +96,7 @@ public class Register : MonoBehaviour
             throw new Exception("OnRegisterButtonClick: Error > " + httpClient.error);
         }
 
-        messageBoardText.text += "\nOnRegisterButtonClick: " + httpClient.responseCode;
+        Debug.Log("\nOnRegisterButtonClick: " + httpClient.responseCode);
 
         httpClient.Dispose();
     }
@@ -83,7 +108,9 @@ public class Register : MonoBehaviour
         playerSerializable.Name = player.Name;
         playerSerializable.Nickname = player.Nickname;
         playerSerializable.Email = player.Email;
+        playerSerializable.Country = player.Country;
         playerSerializable.BirthDay = player.BirthDay.ToString();
+        playerSerializable.BlobUri = player.BlobUri;
 
         using (UnityWebRequest httpClient = new UnityWebRequest(player.HttpServerAddress + "/api/Player/RegisterPlayer", "POST"))
         {
@@ -100,7 +127,7 @@ public class Register : MonoBehaviour
                 throw new Exception("RegisterNewPlayer > InsertPlayer: " + httpClient.error);
             }
 
-            messageBoardText.text += "\nRegisterNewPlayer > InsertPlayer: " + httpClient.responseCode;
+            Debug.Log("\nRegisterNewPlayer > InsertPlayer: " + httpClient.responseCode);
         }
 
     }

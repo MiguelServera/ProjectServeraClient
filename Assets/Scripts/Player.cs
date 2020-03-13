@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private const string _httpServerAddress = "https://localhost:44336";
+    private const string _httpServerAddress = "https://projectserveraapi.azurewebsites.net";
     public string HttpServerAddress
     {
         get
@@ -54,4 +54,17 @@ public class Player : MonoBehaviour
         set { _email = value; }
     }
 
+    private string _country;
+    public string Country
+    {
+        get { return _country; }
+        set { _country = value; }
+    }
+
+    private string _bloburi;
+    public string BlobUri
+    {
+        get { return _bloburi; }
+        set { _bloburi = value; }
+    }
 }

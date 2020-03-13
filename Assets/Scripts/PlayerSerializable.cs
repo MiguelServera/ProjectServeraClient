@@ -7,6 +7,7 @@ public class PlayerSerializable
     public string Name;
     public string Nickname;
     public string Email;
+    public string Country;
     public string BirthDay;
-    public string ConnectedSince;
+    public string BlobUri;
 }
