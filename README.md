@@ -30,3 +30,4 @@ CREATE TABLE [dbo].[PlayersOnline] (
     PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 
+ 
